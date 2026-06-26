@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cycad Handicrafts
+
+A full-stack e-commerce website for **Cycad Handicrafts** — a handmade/artisanal home décor brand from Farrukhabad, Uttar Pradesh.
+
+## Tech Stack
+
+- **Next.js 14** (App Router) with TypeScript
+- **Tailwind CSS** — warm, earthy artisanal design
+- **Supabase** — Postgres database, Auth, Storage
+- **Zod + React Hook Form** — form validation
+- **Lucide Icons**
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone and install
+
+```bash
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Copy `.env.example` to `.env.local` and fill in your Supabase credentials
+3. Run the SQL migrations in the Supabase SQL Editor:
+   - `supabase/schema.sql` — creates tables, RLS policies, storage bucket
+   - `supabase/seed.sql` — seeds demo categories, products, and page content
+
+### 3. Create an admin user
+
+1. In Supabase Dashboard → Authentication → Users, create a new user with email/password
+2. Copy the user's UUID from the users table
+3. Run in SQL Editor:
+
+```sql
+INSERT INTO admins (id, email) VALUES ('your-user-uuid', 'admin@example.com');
+```
+
+### 4. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the store and [http://localhost:3000/admin](http://localhost:3000/admin) for the admin panel.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── (store)/          # Public-facing pages
+│   │   ├── page.tsx      # Home
+│   │   ├── shop/         # Product listing
+│   │   ├── products/     # Product detail
+│   │   ├── cart/         # Shopping cart + checkout
+│   │   ├── about/        # Static pages
+│   │   ├── login/        # Customer auth
+│   │   └── register/
+│   └── admin/            # Protected admin panel
+│       ├── products/     # CRUD products
+│       ├── categories/   # Manage categories
+│       ├── enquiries/    # Contact form submissions
+│       ├── orders/         # Order management
+│       └── pages/          # Edit static page content
+├── components/
+├── context/              # Cart context (localStorage)
+├── lib/                  # Supabase clients, queries, actions
+└── types/
+supabase/
+├── schema.sql
+└── seed.sql
+```
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+### Public Store
+- Home page with hero, about intro, featured products, contact form
+- Shop with category filters, search, and sort
+- Product detail with image gallery and add to cart
+- Cart with quantity editing and checkout (creates orders)
+- Static pages (About, FAQ, Terms, Privacy, Returns) — editable from admin
+- Customer login/register (optional account)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Admin Panel (`/admin`)
+- Dashboard with stats and recent enquiries
+- Product management with image upload to Supabase Storage
+- Category management
+- Enquiry inbox with read/unread status
+- Order management with status updates
+- Static page content editor
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment (Vercel)
 
-## Deploy on Vercel
+1. Push to GitHub
+2. Import in Vercel
+3. Add environment variables from `.env.example`
+4. Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private — Cycad Handicrafts

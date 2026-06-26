@@ -2,26 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    @apply bg-cream-50 text-earth-800 font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif text-earth-900;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-terracotta-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-terracotta-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-terracotta-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 border-terracotta-600 bg-transparent px-6 py-3 text-sm font-semibold text-terracotta-700 transition-all hover:bg-terracotta-50 focus:outline-none focus:ring-2 focus:ring-terracotta-500 focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-earth-700 transition-colors hover:bg-cream-200 focus:outline-none focus:ring-2 focus:ring-terracotta-500 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-earth-200 bg-white px-4 py-2.5 text-sm text-earth-800 placeholder:text-earth-400 focus:border-terracotta-500 focus:outline-none focus:ring-2 focus:ring-terracotta-500/20;
+  }
+
+  .card {
+    @apply rounded-xl border border-cream-200 bg-white shadow-sm;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+  }
+
+  .container-narrow {
+    @apply mx-auto max-w-7xl;
   }
 }

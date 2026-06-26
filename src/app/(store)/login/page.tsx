@@ -1,0 +1,114 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { customerLogin } from "@/lib/actions";
+
+const schema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type FormData = z.infer<typeof schema>;
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const onSubmit = (data: FormData) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await customerLogin(data.email, data.password);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    });
+  };
+
+  return (
+    <section className="section-padding">
+      <div className="container-narrow max-w-md">
+        <div className="card p-8">
+          <h1 className="mb-2 text-center font-serif text-3xl font-bold text-earth-900">
+            Welcome Back
+          </h1>
+          <p className="mb-8 text-center text-earth-600">
+            Sign in to your account
+          </p>
+
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-earth-700">
+                Email
+              </label>
+              <input
+                {...register("email")}
+                type="email"
+                className="input-field"
+                placeholder="you@example.com"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-earth-700">
+                Password
+              </label>
+              <input
+                {...register("password")}
+                type="password"
+                className="input-field"
+                placeholder="••••••••"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="btn-primary w-full"
+            >
+              {isPending ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-earth-600">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-terracotta-600 hover:text-terracotta-700"
+            >
+              Create one
+            </Link>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
