@@ -8,9 +8,9 @@ export const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 280;
 
 export const CONTACT = {
   address: "Barjhala, Farrukhabad, Uttar Pradesh - 209502",
-  phone: "+91 98765 43210",
+  phone: "+91 95698 38076",
   email: "hello@cycadhandicrafts.com",
-  whatsapp: "+919876543210",
+  whatsapp: "+919569838076",
 };
 
 export const SOCIAL_LINKS = [
@@ -26,7 +26,7 @@ export const SOCIAL_LINKS = [
   },
   {
     name: "WhatsApp",
-    href: `https://wa.me/919876543210`,
+    href: `https://wa.me/919569838076`,
     icon: "whatsapp" as const,
   },
 ];

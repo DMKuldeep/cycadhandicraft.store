@@ -280,7 +280,7 @@ function CartPageContent() {
                       <input
                         {...register("customerPhone")}
                         className="input-field"
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 95698 38076"
                       />
                     </div>
                     <div>
