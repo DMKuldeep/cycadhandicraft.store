@@ -9,6 +9,7 @@ import {
   MessageSquare,
   ShoppingCart,
   FileText,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/admin/enquiries", label: "Enquiries", icon: MessageSquare },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/pages", label: "Pages", icon: FileText },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminSidebar() {

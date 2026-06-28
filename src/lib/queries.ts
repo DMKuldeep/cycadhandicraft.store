@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { CONTACT } from "@/lib/constants";
 import type { Product, Category, Enquiry, PageContent, Order } from "@/types/database";
 import type { SortOption } from "@/types/database";
 
@@ -184,6 +185,32 @@ export async function getProductByIdAdmin(id: string): Promise<Product | null> {
   return data as Product;
 }
 
+export async function getRelatedProducts(
+  productId: string,
+  categoryId: string | null,
+  limit = 4
+): Promise<Product[]> {
+  if (!categoryId) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*, categories(*)")
+    .eq("is_active", true)
+    .eq("category_id", categoryId)
+    .neq("id", productId)
+    .limit(limit);
+
+  if (error) return [];
+  return (data ?? []) as Product[];
+}
+
+export async function getAllPages(): Promise<PageContent[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("page_content").select("*");
+  return data ?? [];
+}
+
 export async function isAdmin(): Promise<boolean> {
   const supabase = await createClient();
   const {
@@ -199,4 +226,64 @@ export async function isAdmin(): Promise<boolean> {
     .single();
 
   return !!data;
+}
+
+export interface PaymentSettings {
+  payuMerchantKey: string;
+  payuMerchantSalt: string;
+  payuMode: "test" | "live";
+  enabled: boolean;
+}
+
+const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
+  payuMerchantKey: "",
+  payuMerchantSalt: "",
+  payuMode: "test",
+  enabled: false,
+};
+
+export async function getPaymentSettings(): Promise<PaymentSettings> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("page_content")
+    .select("content")
+    .eq("slug", "payment-settings")
+    .single();
+
+  if (!data?.content) return DEFAULT_PAYMENT_SETTINGS;
+
+  try {
+    return { ...DEFAULT_PAYMENT_SETTINGS, ...JSON.parse(data.content) };
+  } catch {
+    return DEFAULT_PAYMENT_SETTINGS;
+  }
+}
+
+export interface NotificationSettings {
+  notificationEmail: string;
+  notifyOnEnquiry: boolean;
+  sendCustomerAutoReply: boolean;
+}
+
+const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  notificationEmail: CONTACT.email,
+  notifyOnEnquiry: true,
+  sendCustomerAutoReply: true,
+};
+
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("page_content")
+    .select("content")
+    .eq("slug", "notification-settings")
+    .single();
+
+  if (!data?.content) return DEFAULT_NOTIFICATION_SETTINGS;
+
+  try {
+    return { ...DEFAULT_NOTIFICATION_SETTINGS, ...JSON.parse(data.content) };
+  } catch {
+    return DEFAULT_NOTIFICATION_SETTINGS;
+  }
 }

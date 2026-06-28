@@ -32,6 +32,10 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-earth-700 transition-colors hover:bg-cream-200 focus:outline-none focus:ring-2 focus:ring-terracotta-500 focus:ring-offset-2;
   }
 
+  .btn-buy {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-earth-900 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-earth-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-earth-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
   .input-field {
     @apply w-full rounded-lg border border-earth-200 bg-white px-4 py-2.5 text-sm text-earth-800 placeholder:text-earth-400 focus:border-terracotta-500 focus:outline-none focus:ring-2 focus:ring-terracotta-500/20;
   }

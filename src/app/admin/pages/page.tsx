@@ -1,12 +1,5 @@
+import { getAllPages } from "@/lib/queries";
 import { PageEditor } from "@/components/admin/page-editor";
-import { createClient } from "@/lib/supabase/server";
-import type { PageContent } from "@/types/database";
-
-async function getAllPages(): Promise<PageContent[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("page_content").select("*");
-  return data ?? [];
-}
 
 export default async function AdminPagesPage() {
   const pages = await getAllPages();

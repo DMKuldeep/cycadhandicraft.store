@@ -3,6 +3,9 @@ export const SITE_TAGLINE = "Handcrafted with Love, Made Just for You";
 export const SITE_DESCRIPTION =
   "Discover exquisite handcrafted home décor — tealight diyas, candle holders, idols, ceramics, stone carvings, and wooden crafts from the heart of Uttar Pradesh.";
 
+export const MAX_PRODUCT_IMAGES = 6;
+export const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 280;
+
 export const CONTACT = {
   address: "Barjhala, Farrukhabad, Uttar Pradesh - 209502",
   phone: "+91 98765 43210",

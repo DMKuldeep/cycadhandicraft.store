@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/products/product-detail";
-import { getProductBySlug } from "@/lib/queries";
+import { getProductBySlug, getRelatedProducts } from "@/lib/queries";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -24,10 +24,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const relatedProducts = await getRelatedProducts(
+    product.id,
+    product.category_id,
+    4
+  );
+
   return (
-    <section className="section-padding">
+    <section className="section-padding !py-8 sm:!py-12">
       <div className="container-narrow">
-        <ProductDetail product={product} />
+        <ProductDetail product={product} relatedProducts={relatedProducts} />
       </div>
     </section>
   );

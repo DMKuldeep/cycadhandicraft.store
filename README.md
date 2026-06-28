@@ -20,29 +20,24 @@ npm install
 
 ### 2. Set up Supabase
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Copy `.env.example` to `.env.local` and fill in your Supabase credentials
-3. Run the SQL migrations in the Supabase SQL Editor:
-   - `supabase/schema.sql` — creates tables, RLS policies, storage bucket
-   - `supabase/seed.sql` — seeds demo categories, products, and page content
+**Full step-by-step guide:** see **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**
 
-### 3. Create an admin user
+Quick summary:
 
-1. In Supabase Dashboard → Authentication → Users, create a new user with email/password
-2. Copy the user's UUID from the users table
-3. Run in SQL Editor:
+1. Create a **new** Supabase project (not shared with other apps)
+2. Run `supabase/schema.sql` then `supabase/seed.sql` in SQL Editor
+3. Create an admin user in Auth + insert into `admins` table
+4. Copy `.env.example` → `.env.local` and add your Supabase keys
 
-```sql
-INSERT INTO admins (id, email) VALUES ('your-user-uuid', 'admin@example.com');
-```
-
-### 4. Run the dev server
+### 3. Run the dev server
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) for the store and [http://localhost:3000/admin](http://localhost:3000/admin) for the admin panel.
+
+Supabase is **required** — the app reads all products, categories, and orders from your database.
 
 ## Project Structure
 

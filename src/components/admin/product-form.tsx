@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Upload, X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { Product, Category } from "@/types/database";
 import {
   createProduct,
   updateProduct,
   createCategory,
-  uploadProductImage,
 } from "@/lib/actions";
+import { ProductMediaManager } from "./product-media-manager";
 
 interface ProductFormProps {
   product?: Product;
@@ -22,26 +21,11 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState(initialCategories);
-  const [imageUrls, setImageUrls] = useState<string[]>(product?.image_urls ?? []);
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    product?.image_urls?.slice(0, 6) ?? []
+  );
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [uploading, setUploading] = useState(false);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    setUploading(true);
-    for (const file of Array.from(files)) {
-      const formData = new FormData();
-      formData.append("file", file);
-      const result = await uploadProductImage(formData);
-      if (result.url) {
-        setImageUrls((prev) => [...prev, result.url!]);
-      }
-    }
-    setUploading(false);
-  };
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
@@ -70,7 +54,13 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
     setError(null);
     const formData = new FormData(e.currentTarget);
     formData.set("imageUrls", JSON.stringify(imageUrls));
-    formData.set("isActive", (e.currentTarget.elements.namedItem("isActive") as HTMLInputElement).checked ? "true" : "false");
+    formData.set(
+      "isActive",
+      (e.currentTarget.elements.namedItem("isActive") as HTMLInputElement)
+        .checked
+        ? "true"
+        : "false"
+    );
 
     startTransition(async () => {
       const result = product
@@ -87,7 +77,7 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card max-w-2xl p-6">
+    <form onSubmit={handleSubmit} className="card max-w-3xl p-6">
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
@@ -95,6 +85,8 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
       )}
 
       <div className="space-y-6">
+        <ProductMediaManager imageUrls={imageUrls} onChange={setImageUrls} />
+
         <div>
           <label className="mb-1 block text-sm font-medium text-earth-700">
             Product Name *
@@ -104,19 +96,26 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
             defaultValue={product?.name}
             required
             className="input-field"
+            placeholder="e.g. Brass Tealight Diya Set"
           />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-earth-700">
-            Description
+            Description *
           </label>
           <textarea
             name="description"
             defaultValue={product?.description ?? ""}
-            rows={4}
-            className="input-field resize-none"
+            rows={8}
+            required
+            className="input-field resize-y"
+            placeholder="Full product description — shown on product page with Read more / Read less…"
           />
+          <p className="mt-1 text-xs text-earth-500">
+            Write a detailed description. Long text collapses on the product
+            page with a Read more toggle.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -191,38 +190,6 @@ export function ProductForm({ product, categories: initialCategories }: ProductF
               </button>
             </div>
           )}
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-earth-700">
-            Images
-          </label>
-          <div className="mb-3 flex flex-wrap gap-3">
-            {imageUrls.map((url, i) => (
-              <div key={i} className="relative h-20 w-20 overflow-hidden rounded-lg">
-                <Image src={url} alt="" fill className="object-cover" sizes="80px" />
-                <button
-                  type="button"
-                  onClick={() => setImageUrls((prev) => prev.filter((_, j) => j !== i))}
-                  className="absolute right-0.5 top-0.5 rounded-full bg-red-600 p-0.5 text-white"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-          <label className="btn-secondary cursor-pointer">
-            <Upload className="h-4 w-4" />
-            {uploading ? "Uploading..." : "Upload Images"}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
         </div>
 
         <div className="flex items-center gap-2">

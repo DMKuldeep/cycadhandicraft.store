@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, CheckCircle } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { formatPrice } from "@/lib/utils";
@@ -20,7 +21,8 @@ const checkoutSchema = z.object({
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
-export default function CartPage() {
+function CartPageContent() {
+  const searchParams = useSearchParams();
   const { items, removeItem, updateQuantity, subtotal, clearCart, itemCount } =
     useCart();
   const [showCheckout, setShowCheckout] = useState(false);
@@ -36,6 +38,12 @@ export default function CartPage() {
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
   });
+
+  useEffect(() => {
+    if (searchParams.get("checkout") === "1" && itemCount > 0) {
+      setShowCheckout(true);
+    }
+  }, [searchParams, itemCount]);
 
   const onCheckout = (data: CheckoutForm) => {
     setError(null);
@@ -319,5 +327,13 @@ export default function CartPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <Suspense fallback={<div className="section-padding text-center">Loading cart…</div>}>
+      <CartPageContent />
+    </Suspense>
   );
 }

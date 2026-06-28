@@ -1,6 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  sendEnquiryAutoReplyEmail,
+  sendEnquiryNotificationEmail,
+} from "@/lib/email";
+import { getNotificationSettings } from "@/lib/queries";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { slugify } from "@/lib/utils";
@@ -28,6 +33,27 @@ export async function submitEnquiry(formData: FormData) {
   if (error) {
     console.error("Enquiry submission error:", error);
     return { error: "Failed to submit enquiry. Please try again." };
+  }
+
+  const notificationSettings = await getNotificationSettings();
+
+  if (
+    notificationSettings.notifyOnEnquiry &&
+    notificationSettings.notificationEmail
+  ) {
+    await sendEnquiryNotificationEmail({
+      to: notificationSettings.notificationEmail,
+      name: parsed.data.name,
+      email: parsed.data.email,
+      message: parsed.data.message,
+    });
+  }
+
+  if (notificationSettings.sendCustomerAutoReply) {
+    await sendEnquiryAutoReplyEmail({
+      to: parsed.data.email,
+      name: parsed.data.name,
+    });
   }
 
   return { success: true };
@@ -105,17 +131,15 @@ export async function createOrder(data: z.infer<typeof checkoutSchema>) {
 
 const productSchema = z.object({
   name: z.string().min(2),
-  description: z.string().optional(),
+  description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.coerce.number().min(0),
   categoryId: z.string().optional(),
   stock: z.coerce.number().min(0),
-  imageUrls: z.array(z.string()).default([]),
+  imageUrls: z.array(z.string()).max(6, "Maximum 6 images allowed").default([]),
   isActive: z.boolean().default(true),
 });
 
 export async function createProduct(formData: FormData) {
-  const supabase = await createClient();
-
   const imageUrlsRaw = formData.get("imageUrls") as string;
   const imageUrls = imageUrlsRaw ? JSON.parse(imageUrlsRaw) : [];
 
@@ -133,6 +157,7 @@ export async function createProduct(formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
+  const supabase = await createClient();
   const slug = slugify(parsed.data.name);
 
   const { error } = await supabase.from("products").insert({
@@ -157,8 +182,6 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const supabase = await createClient();
-
   const imageUrlsRaw = formData.get("imageUrls") as string;
   const imageUrls = imageUrlsRaw ? JSON.parse(imageUrlsRaw) : [];
 
@@ -176,6 +199,7 @@ export async function updateProduct(id: string, formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
+  const supabase = await createClient();
   const slug = slugify(parsed.data.name);
 
   const { error } = await supabase
@@ -221,8 +245,6 @@ const categorySchema = z.object({
 });
 
 export async function createCategory(formData: FormData) {
-  const supabase = await createClient();
-
   const parsed = categorySchema.safeParse({
     name: formData.get("name"),
     imageUrl: formData.get("imageUrl") || undefined,
@@ -231,6 +253,8 @@ export async function createCategory(formData: FormData) {
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
+
+  const supabase = await createClient();
 
   const { error } = await supabase.from("categories").insert({
     name: parsed.data.name,
@@ -248,8 +272,6 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
-  const supabase = await createClient();
-
   const parsed = categorySchema.safeParse({
     name: formData.get("name"),
     imageUrl: formData.get("imageUrl") || undefined,
@@ -258,6 +280,8 @@ export async function updateCategory(id: string, formData: FormData) {
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
+
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("categories")
@@ -305,7 +329,11 @@ export async function markEnquiryRead(id: string, isRead: boolean) {
   return { success: true };
 }
 
-export async function updatePageContent(slug: string, title: string, content: string) {
+export async function updatePageContent(
+  slug: string,
+  title: string,
+  content: string
+) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("page_content")
@@ -321,12 +349,13 @@ export async function updatePageContent(slug: string, title: string, content: st
 }
 
 export async function uploadProductImage(formData: FormData) {
-  const supabase = await createClient();
   const file = formData.get("file") as File;
 
   if (!file) {
     return { error: "No file provided" };
   }
+
+  const supabase = await createClient();
 
   const ext = file.name.split(".").pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -404,7 +433,11 @@ export async function customerLogin(email: string, password: string) {
   return { success: true };
 }
 
-export async function customerRegister(email: string, password: string, name: string) {
+export async function customerRegister(
+  email: string,
+  password: string,
+  name: string
+) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email,
@@ -423,5 +456,66 @@ export async function customerRegister(email: string, password: string, name: st
 export async function customerLogout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  return { success: true };
+}
+
+const paymentSettingsSchema = z.object({
+  payuMerchantKey: z.string(),
+  payuMerchantSalt: z.string(),
+  payuMode: z.enum(["test", "live"]),
+  enabled: z.boolean(),
+});
+
+export async function savePaymentSettings(
+  settings: z.infer<typeof paymentSettingsSchema>
+) {
+  const parsed = paymentSettingsSchema.safeParse(settings);
+  if (!parsed.success) {
+    return { error: "Invalid payment settings" };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("page_content").upsert({
+    slug: "payment-settings",
+    title: "Payment Settings",
+    content: JSON.stringify(parsed.data),
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return { error: "Failed to save payment settings" };
+  }
+
+  revalidatePath("/admin/settings");
+  return { success: true };
+}
+
+const notificationSettingsSchema = z.object({
+  notificationEmail: z.string().email("Please enter a valid email"),
+  notifyOnEnquiry: z.boolean(),
+  sendCustomerAutoReply: z.boolean(),
+});
+
+export async function saveNotificationSettings(
+  settings: z.infer<typeof notificationSettingsSchema>
+) {
+  const parsed = notificationSettingsSchema.safeParse(settings);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("page_content").upsert({
+    slug: "notification-settings",
+    title: "Notification Settings",
+    content: JSON.stringify(parsed.data),
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return { error: "Failed to save notification settings" };
+  }
+
+  revalidatePath("/admin/settings");
   return { success: true };
 }
