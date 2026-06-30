@@ -149,7 +149,7 @@ export function ProductDetail({
                 </div>
 
                 {/* Trust badges */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
                   {TRUST_BADGES.map(({ icon: Icon, label }) => (
                     <div
                       key={label}
@@ -287,7 +287,7 @@ export function ProductDetail({
       {/* Related products */}
       {relatedProducts.length > 0 && (
         <section className="mt-14 border-t border-cream-200 pt-10">
-          <div className="mb-8 flex items-end justify-between">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-serif text-2xl font-bold text-earth-900">
               You May Also Like
             </h2>

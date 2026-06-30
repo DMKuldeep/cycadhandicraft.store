@@ -10,7 +10,7 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-serif text-3xl font-bold text-earth-900">
           Products
         </h1>

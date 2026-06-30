@@ -2,11 +2,10 @@ import Link from "next/link";
 import { MessageCircle, Mail, Phone, MapPin } from "lucide-react";
 import {
   SITE_NAME,
-  CONTACT,
-  SOCIAL_LINKS,
   FOOTER_QUICK_LINKS,
   FOOTER_CARE_LINKS,
 } from "@/lib/constants";
+import type { SiteSettings } from "@/lib/queries";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/social-icons";
 
 const socialIcons = {
@@ -15,7 +14,29 @@ const socialIcons = {
   whatsapp: MessageCircle,
 };
 
-export function Footer() {
+interface FooterProps {
+  siteSettings: SiteSettings;
+}
+
+export function Footer({ siteSettings }: FooterProps) {
+  const socialLinks = [
+    {
+      name: "Instagram",
+      href: siteSettings.instagramUrl,
+      icon: "instagram" as const,
+    },
+    {
+      name: "Facebook",
+      href: siteSettings.facebookUrl,
+      icon: "facebook" as const,
+    },
+    {
+      name: "WhatsApp",
+      href: `https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`,
+      icon: "whatsapp" as const,
+    },
+  ];
+
   return (
     <footer className="border-t border-cream-200 bg-earth-900 text-cream-100">
       <div className="container-narrow section-padding !py-12">
@@ -29,7 +50,7 @@ export function Footer() {
               tells a story of tradition, artistry, and love.
             </p>
             <div className="flex gap-3">
-              {SOCIAL_LINKS.map((social) => {
+              {socialLinks.map((social) => {
                 const Icon = socialIcons[social.icon];
                 return (
                   <a
@@ -90,24 +111,24 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-cream-300">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-terracotta-400" />
-                <span>{CONTACT.address}</span>
+                <span className="break-words">{siteSettings.address}</span>
               </li>
               <li>
                 <a
-                  href={`tel:${CONTACT.phone.replace(/\s/g, "")}`}
-                  className="flex items-center gap-2 text-sm text-cream-300 transition-colors hover:text-terracotta-300"
+                  href={`tel:${siteSettings.phone.replace(/\s/g, "")}`}
+                  className="flex items-center gap-2 break-all text-sm text-cream-300 transition-colors hover:text-terracotta-300"
                 >
                   <Phone className="h-4 w-4 shrink-0 text-terracotta-400" />
-                  {CONTACT.phone}
+                  {siteSettings.phone}
                 </a>
               </li>
               <li>
                 <a
-                  href={`mailto:${CONTACT.email}`}
-                  className="flex items-center gap-2 text-sm text-cream-300 transition-colors hover:text-terracotta-300"
+                  href={`mailto:${siteSettings.email}`}
+                  className="flex items-center gap-2 break-all text-sm text-cream-300 transition-colors hover:text-terracotta-300"
                 >
                   <Mail className="h-4 w-4 shrink-0 text-terracotta-400" />
-                  {CONTACT.email}
+                  {siteSettings.email}
                 </a>
               </li>
             </ul>

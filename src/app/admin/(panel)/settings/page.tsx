@@ -1,12 +1,19 @@
 import { NotificationSettingsForm } from "@/components/admin/notification-settings-form";
 import { PaymentSettingsForm } from "@/components/admin/payment-settings-form";
-import { getNotificationSettings, getPaymentSettings } from "@/lib/queries";
+import { SiteSettingsForm } from "@/components/admin/site-settings-form";
+import {
+  getNotificationSettings,
+  getPaymentSettings,
+  getSiteSettings,
+} from "@/lib/queries";
 
 export default async function AdminSettingsPage() {
-  const [paymentSettings, notificationSettings] = await Promise.all([
-    getPaymentSettings(),
-    getNotificationSettings(),
-  ]);
+  const [paymentSettings, notificationSettings, siteSettings] =
+    await Promise.all([
+      getPaymentSettings(),
+      getNotificationSettings(),
+      getSiteSettings(),
+    ]);
 
   return (
     <div>
@@ -14,10 +21,11 @@ export default async function AdminSettingsPage() {
         Settings
       </h1>
       <p className="mb-8 text-earth-600">
-        Manage store configuration. Products, categories, orders, and pages are
-        all controlled from this admin panel.
+        Manage contact info, homepage content, email notifications, and payment
+        configuration — no code changes needed.
       </p>
       <div className="space-y-10">
+        <SiteSettingsForm initialSettings={siteSettings} />
         <NotificationSettingsForm initialSettings={notificationSettings} />
         <PaymentSettingsForm initialSettings={paymentSettings} />
       </div>

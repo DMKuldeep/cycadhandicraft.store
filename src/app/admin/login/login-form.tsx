@@ -2,23 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Lock } from "lucide-react";
 import { adminLogin } from "@/lib/actions";
 import { SITE_NAME } from "@/lib/constants";
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-type FormData = z.infer<typeof schema>;
-
 export default function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "unauthorized"
       ? "You are not authorized as an admin"
@@ -26,19 +18,26 @@ export default function AdminLoginForm() {
   );
   const [isPending, startTransition] = useTransition();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
-
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
+
+    if (!email.trim() || !password) {
+      setError("Please enter email and password");
+      return;
+    }
+
     startTransition(async () => {
-      const result = await adminLogin(data.email, data.password);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        router.push("/admin");
-        router.refresh();
+      try {
+        const result = await adminLogin(email.trim(), password);
+        if (result.error) {
+          setError(result.error);
+        } else {
+          router.push("/admin");
+          router.refresh();
+        }
+      } catch {
+        setError("Login failed. Please try again.");
       }
     });
   };
@@ -63,36 +62,43 @@ export default function AdminLoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-cream-300">
+              <label
+                htmlFor="admin-email"
+                className="mb-1 block text-sm font-medium text-cream-300"
+              >
                 Email
               </label>
               <input
-                {...register("email")}
+                id="admin-email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
                 className="w-full rounded-lg border border-earth-700 bg-earth-900 px-4 py-2.5 text-cream-50 placeholder:text-earth-500 focus:border-terracotta-500 focus:outline-none focus:ring-2 focus:ring-terracotta-500/20"
-                placeholder="admin@example.com"
+                placeholder="cycadhandicraftdb@gmail.com"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
-              )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-cream-300">
+              <label
+                htmlFor="admin-password"
+                className="mb-1 block text-sm font-medium text-cream-300"
+              >
                 Password
               </label>
               <input
-                {...register("password")}
+                id="admin-password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                minLength={6}
                 className="w-full rounded-lg border border-earth-700 bg-earth-900 px-4 py-2.5 text-cream-50 placeholder:text-earth-500 focus:border-terracotta-500 focus:outline-none focus:ring-2 focus:ring-terracotta-500/20"
                 placeholder="••••••••"
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-400">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
             <button
               type="submit"

@@ -2,8 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
-  supabaseResponse.headers.set("x-pathname", request.nextUrl.pathname);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +21,9 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeaders },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -33,28 +39,33 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin")) {
     const isLoginPage = request.nextUrl.pathname === "/admin/login";
 
-    if (!user && !isLoginPage) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
+    if (!user) {
+      if (!isLoginPage) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/login";
+        return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
     }
 
-    if (user && !isLoginPage) {
-      const { data: admin } = await supabase
-        .from("admins")
-        .select("id")
-        .eq("id", user.id)
-        .single();
+    const { data: admin } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("id", user.id)
+      .single();
 
-      if (!admin) {
+    if (!admin) {
+      await supabase.auth.signOut();
+      if (!isLoginPage) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin/login";
         url.searchParams.set("error", "unauthorized");
         return NextResponse.redirect(url);
       }
+      return supabaseResponse;
     }
 
-    if (user && isLoginPage) {
+    if (isLoginPage) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
       return NextResponse.redirect(url);

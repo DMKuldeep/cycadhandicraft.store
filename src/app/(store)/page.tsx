@@ -5,8 +5,7 @@ import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { ProductGrid } from "@/components/products/product-grid";
 import { ContactForm } from "@/components/forms/contact-form";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/social-icons";
-import { SITE_TAGLINE, CONTACT, SOCIAL_LINKS } from "@/lib/constants";
-import { getProducts } from "@/lib/queries";
+import { getProducts, getSiteSettings } from "@/lib/queries";
 
 const socialIcons = {
   instagram: InstagramIcon,
@@ -15,7 +14,20 @@ const socialIcons = {
 };
 
 export default async function HomePage() {
-  const products = await getProducts({ limit: 8 });
+  const [products, site] = await Promise.all([
+    getProducts({ limit: 8 }),
+    getSiteSettings(),
+  ]);
+
+  const socialLinks = [
+    { name: "Instagram", href: site.instagramUrl, icon: "instagram" as const },
+    { name: "Facebook", href: site.facebookUrl, icon: "facebook" as const },
+    {
+      name: "WhatsApp",
+      href: `https://wa.me/${site.whatsapp.replace(/\D/g, "")}`,
+      icon: "whatsapp" as const,
+    },
+  ];
 
   return (
     <>
@@ -30,16 +42,14 @@ export default async function HomePage() {
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-terracotta-100 px-4 py-1.5 text-sm font-medium text-terracotta-700">
                 <Sparkles className="h-4 w-4" />
-                Artisanal Home Décor
+                {site.heroBadge}
               </div>
-              <h1 className="mb-6 font-serif text-5xl font-bold leading-tight text-earth-900 sm:text-6xl">
-                Handcrafted with Love,{" "}
-                <span className="text-terracotta-600">Made Just for You</span>
+              <h1 className="mb-6 font-serif text-3xl font-bold leading-tight text-earth-900 sm:text-5xl lg:text-6xl">
+                {site.heroTitle}{" "}
+                <span className="text-terracotta-600">{site.heroHighlight}</span>
               </h1>
               <p className="mb-8 max-w-lg text-lg leading-relaxed text-earth-600">
-                Discover exquisite handcrafted home décor — from traditional diyas
-                and idols to elegant ceramics and stone carvings, each piece
-                crafted by skilled artisans in Farrukhabad.
+                {site.heroDescription}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/shop" className="btn-primary">
@@ -51,10 +61,10 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="relative hidden lg:block">
+            <div className="relative hidden md:block">
               <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl">
                 <Image
-                  src="https://placehold.co/800x800/F5E6D3/8B6F47?text=Cycad+Handicrafts"
+                  src={site.heroImageUrl}
                   alt="Handcrafted home décor collection"
                   fill
                   className="object-cover"
@@ -78,7 +88,7 @@ export default async function HomePage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
               <Image
-                src="https://placehold.co/800x600/F5E6D3/8B6F47?text=Our+Artisans"
+                src={site.aboutImageUrl}
                 alt="Artisan crafting handicrafts"
                 fill
                 className="object-cover"
@@ -86,21 +96,16 @@ export default async function HomePage() {
             </div>
             <div>
               <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-terracotta-600">
-                Our Story
+                {site.aboutSubtitle}
               </p>
               <h2 className="mb-6 font-serif text-3xl font-bold text-earth-900 sm:text-4xl">
-                Tradition Woven Into Every Piece
+                {site.aboutTitle}
               </h2>
               <p className="mb-4 leading-relaxed text-earth-600">
-                {SITE_TAGLINE} — at Cycad Handicrafts, we believe that the beauty
-                of handmade artistry lies in its imperfections, its warmth, and
-                the stories each piece carries.
+                {site.aboutText1}
               </p>
               <p className="mb-6 leading-relaxed text-earth-600">
-                From our workshop in Barjhala, Farrukhabad, our artisans pour
-                their hearts into creating tealight diyas, brass idols, ceramic
-                vases, marble sculptures, and wooden crafts that bring the
-                essence of Indian craftsmanship into modern homes.
+                {site.aboutText2}
               </p>
               <Link href="/about" className="btn-secondary">
                 Learn More About Us
@@ -148,45 +153,45 @@ export default async function HomePage() {
             </h2>
           </div>
           <div className="grid gap-10 lg:grid-cols-2">
-            <div className="card p-8">
+            <div className="card p-4 sm:p-6 lg:p-8">
               <ContactForm />
             </div>
             <div className="space-y-6">
-              <div className="card p-6">
+              <div className="card p-4 sm:p-6">
                 <h3 className="mb-4 font-serif text-xl font-semibold text-earth-900">
                   Visit Our Workshop
                 </h3>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3 text-earth-600">
                     <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-terracotta-500" />
-                    <span>{CONTACT.address}</span>
+                    <span className="break-words">{site.address}</span>
                   </li>
                   <li>
                     <a
-                      href={`tel:${CONTACT.phone.replace(/\s/g, "")}`}
-                      className="flex items-center gap-3 text-earth-600 transition-colors hover:text-terracotta-600"
+                      href={`tel:${site.phone.replace(/\s/g, "")}`}
+                      className="flex items-center gap-3 break-all text-earth-600 transition-colors hover:text-terracotta-600"
                     >
                       <Phone className="h-5 w-5 shrink-0 text-terracotta-500" />
-                      {CONTACT.phone}
+                      {site.phone}
                     </a>
                   </li>
                   <li>
                     <a
-                      href={`mailto:${CONTACT.email}`}
-                      className="flex items-center gap-3 text-earth-600 transition-colors hover:text-terracotta-600"
+                      href={`mailto:${site.email}`}
+                      className="flex items-center gap-3 break-all text-earth-600 transition-colors hover:text-terracotta-600"
                     >
                       <Mail className="h-5 w-5 shrink-0 text-terracotta-500" />
-                      {CONTACT.email}
+                      {site.email}
                     </a>
                   </li>
                 </ul>
               </div>
-              <div className="card p-6">
+              <div className="card p-4 sm:p-6">
                 <h3 className="mb-4 font-serif text-xl font-semibold text-earth-900">
                   Follow Us
                 </h3>
-                <div className="flex gap-3">
-                  {SOCIAL_LINKS.map((social) => {
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  {socialLinks.map((social) => {
                     const Icon = socialIcons[social.icon];
                     return (
                       <a
@@ -194,7 +199,7 @@ export default async function HomePage() {
                         href={social.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 rounded-lg bg-cream-100 px-4 py-2.5 text-sm font-medium text-earth-700 transition-colors hover:bg-terracotta-100 hover:text-terracotta-700"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-cream-100 px-4 py-2.5 text-sm font-medium text-earth-700 transition-colors hover:bg-terracotta-100 hover:text-terracotta-700 sm:justify-start"
                       >
                         <Icon className="h-4 w-4" />
                         {social.name}

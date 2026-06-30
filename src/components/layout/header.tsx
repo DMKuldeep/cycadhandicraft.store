@@ -14,8 +14,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-cream-200 bg-cream-50/95 backdrop-blur-sm">
       <div className="container-narrow flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex flex-col">
-          <span className="font-serif text-2xl font-bold text-terracotta-700 transition-colors group-hover:text-terracotta-600">
+        <Link href="/" className="group flex min-w-0 flex-col">
+          <span className="truncate font-serif text-xl font-bold text-terracotta-700 transition-colors group-hover:text-terracotta-600 sm:text-2xl">
             {SITE_NAME}
           </span>
           <span className="hidden text-xs text-earth-500 sm:block">

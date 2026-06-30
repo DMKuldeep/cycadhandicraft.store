@@ -36,9 +36,9 @@ export function EnquiryList({ enquiries }: EnquiryListProps) {
           key={enquiry.id}
           className={`card p-6 ${!enquiry.is_read ? "border-l-4 border-l-terracotta-500" : ""}`}
         >
-          <div className="mb-4 flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold text-earth-900">{enquiry.name}</h3>
                 {!enquiry.is_read && (
                   <span className="rounded-full bg-terracotta-100 px-2 py-0.5 text-xs font-medium text-terracotta-700">
@@ -48,7 +48,7 @@ export function EnquiryList({ enquiries }: EnquiryListProps) {
               </div>
               <a
                 href={`mailto:${enquiry.email}`}
-                className="flex items-center gap-1 text-sm text-terracotta-600 hover:text-terracotta-700"
+                className="flex items-center gap-1 break-all text-sm text-terracotta-600 hover:text-terracotta-700"
               >
                 <Mail className="h-3 w-3" />
                 {enquiry.email}

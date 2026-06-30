@@ -77,9 +77,9 @@ export function ShopContent({ categories }: ShopContentProps) {
   };
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row">
-      {/* Sidebar Filters - Desktop */}
-      <aside className="hidden w-64 shrink-0 lg:block">
+    <div className="flex min-w-0 flex-col gap-8 md:flex-row">
+      {/* Sidebar Filters - Desktop & iPad landscape */}
+      <aside className="hidden w-56 shrink-0 md:block lg:w-64">
         <div className="card sticky top-24 p-6">
           <h3 className="mb-4 font-serif text-lg font-semibold text-earth-900">
             Categories
@@ -123,7 +123,7 @@ export function ShopContent({ categories }: ShopContentProps) {
         </div>
       </aside>
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         {/* Search & Sort Bar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1">
@@ -139,10 +139,10 @@ export function ShopContent({ categories }: ShopContentProps) {
               className="input-field pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="btn-ghost border border-earth-200 lg:hidden"
+              className="btn-ghost shrink-0 border border-earth-200 md:hidden"
             >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
@@ -153,7 +153,7 @@ export function ShopContent({ categories }: ShopContentProps) {
                 setSort(e.target.value as SortOption);
                 updateParams("sort", e.target.value);
               }}
-              className="input-field w-auto"
+              className="input-field min-w-0 flex-1 sm:flex-none sm:w-auto"
             >
               <option value="newest">Newest</option>
               <option value="price-asc">Price: Low to High</option>
@@ -165,7 +165,7 @@ export function ShopContent({ categories }: ShopContentProps) {
 
         {/* Mobile Filters */}
         {showFilters && (
-          <div className="mb-6 card p-4 lg:hidden">
+          <div className="mb-6 card p-4 md:hidden">
             <h3 className="mb-3 font-semibold text-earth-900">Categories</h3>
             <div className="flex flex-wrap gap-2">
               <button

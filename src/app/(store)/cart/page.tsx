@@ -137,11 +137,11 @@ function CartPageContent() {
                       sizes="96px"
                     />
                   </Link>
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-between">
+                    <div className="min-w-0">
                       <Link
                         href={`/products/${item.slug}`}
-                        className="font-serif text-lg font-semibold text-earth-900 hover:text-terracotta-600"
+                        className="line-clamp-2 font-serif text-base font-semibold text-earth-900 hover:text-terracotta-600 sm:text-lg"
                       >
                         {item.name}
                       </Link>

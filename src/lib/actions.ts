@@ -400,6 +400,19 @@ export async function adminLogin(email: string, password: string) {
   });
 
   if (error) {
+    console.error("Admin login error:", error.message);
+    if (error.message.toLowerCase().includes("email not confirmed")) {
+      return {
+        error:
+          "Email not confirmed. In Supabase → Authentication → Users, confirm the user or disable email confirmation.",
+      };
+    }
+    if (error.message.toLowerCase().includes("invalid api key")) {
+      return {
+        error:
+          "Supabase API key problem. In .env.local use the anon public key (starts with eyJ) from Project Settings → API.",
+      };
+    }
     return { error: "Invalid email or password" };
   }
 
@@ -516,6 +529,51 @@ export async function saveNotificationSettings(
     return { error: "Failed to save notification settings" };
   }
 
+  revalidatePath("/admin/settings");
+  return { success: true };
+}
+
+const siteSettingsSchema = z.object({
+  phone: z.string().min(5),
+  email: z.string().email(),
+  whatsapp: z.string().min(10),
+  address: z.string().min(5),
+  instagramUrl: z.string().url(),
+  facebookUrl: z.string().url(),
+  heroBadge: z.string().min(1),
+  heroTitle: z.string().min(1),
+  heroHighlight: z.string().min(1),
+  heroDescription: z.string().min(1),
+  heroImageUrl: z.string().min(1),
+  aboutImageUrl: z.string().min(1),
+  aboutSubtitle: z.string().min(1),
+  aboutTitle: z.string().min(1),
+  aboutText1: z.string().min(1),
+  aboutText2: z.string().min(1),
+});
+
+export async function saveSiteSettings(
+  settings: z.infer<typeof siteSettingsSchema>
+) {
+  const parsed = siteSettingsSchema.safeParse(settings);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("page_content").upsert({
+    slug: "site-settings",
+    title: "Site Settings",
+    content: JSON.stringify(parsed.data),
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return { error: "Failed to save site settings" };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/about");
   revalidatePath("/admin/settings");
   return { success: true };
 }

@@ -41,7 +41,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       <div className="flex flex-col gap-4 lg:flex-row">
         {/* Thumbnails — vertical on desktop */}
         {images.length > 1 && (
-          <div className="order-2 flex gap-2 overflow-x-auto pb-1 lg:order-1 lg:max-h-[520px] lg:w-20 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:pb-0">
+          <div className="order-2 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] lg:order-1 lg:max-h-[520px] lg:w-20 lg:snap-none lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:pb-0">
             {images.map((img, i) => (
               <button
                 key={i}
@@ -49,7 +49,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 onMouseEnter={() => setSelected(i)}
                 onClick={() => setSelected(i)}
                 className={cn(
-                  "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-cream-50 transition-all lg:h-[72px] lg:w-[72px]",
+                  "relative h-16 w-16 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-cream-50 transition-all lg:h-[72px] lg:w-[72px]",
                   selected === i
                     ? "border-terracotta-600 ring-2 ring-terracotta-200"
                     : "border-cream-200 hover:border-terracotta-300"
@@ -94,9 +94,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-earth-900/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-earth-700 shadow-sm backdrop-blur-sm lg:hidden">
+            <div className="absolute bottom-14 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-earth-700 shadow-sm backdrop-blur-sm sm:bottom-3 lg:hidden">
               <ZoomIn className="h-3.5 w-3.5" />
-              Pinch or tap to expand
+              <span className="hidden sm:inline">Pinch or tap to expand</span>
+              <span className="sm:hidden">Tap to zoom</span>
             </div>
 
             <button
@@ -105,7 +106,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-earth-700 shadow-md transition hover:bg-white"
             >
               <Expand className="h-3.5 w-3.5" />
-              Full view
+              <span className="hidden sm:inline">Full view</span>
             </button>
           </div>
 
@@ -154,7 +155,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   e.stopPropagation();
                   goTo(selected - 1);
                 }}
-                className="absolute left-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
+                className="absolute bottom-6 left-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 sm:bottom-auto sm:left-4 sm:top-1/2 sm:-translate-y-1/2"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="h-6 w-6" />
@@ -165,7 +166,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   e.stopPropagation();
                   goTo(selected + 1);
                 }}
-                className="absolute right-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
+                className="absolute bottom-6 right-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 sm:bottom-auto sm:right-4 sm:top-1/2 sm:-translate-y-1/2"
                 aria-label="Next image"
               >
                 <ChevronRight className="h-6 w-6" />
